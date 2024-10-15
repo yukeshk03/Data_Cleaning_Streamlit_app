@@ -207,8 +207,6 @@ rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 rich==13.7.1
 s3fs==2024.3.0
-# Editable install with no version control (salesforce-uni2ts==0.0.0a0)
--e c:\users\yukesh\appdata\local\programs\python\python311\uni2ts
 scikit-learn==1.2.2
 scipy==1.11.4
 seaborn==0.12.2
