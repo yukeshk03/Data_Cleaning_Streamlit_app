@@ -153,7 +153,7 @@ optree==0.11.0
 optuna==3.6.1
 orjson==3.10.0
 packaging==23.0
-pandas==2.1.4
+pandas==1.5.3
 pandas-datareader==0.10.0
 pandas-flavor==0.6.0
 pandocfilters==1.5.0
@@ -191,7 +191,7 @@ python-json-logger==2.0.4
 pytorch-lightning==2.2.1
 pytrends==4.9.2
 pytz==2022.7.1
-pywin32==307
+pywin32==300
 pywinpty==2.0.10
 PyYAML==6.0
 pyzmq==25.0.0
@@ -224,7 +224,7 @@ stack-data==0.6.2
 stanio==0.3.0
 statsforecast==1.7.3
 statsmodels==0.14.1
-streamlit==1.39.0
+streamlit==1.24.0
 sympy==1.12
 tabulate==0.9.0
 tbats==1.1.3
