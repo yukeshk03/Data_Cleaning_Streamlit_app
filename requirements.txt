@@ -191,7 +191,6 @@ python-json-logger
 pytorch-lightning
 pytrends
 pytz
-pywinpty
 PyYAML
 pyzmq
 qpd
