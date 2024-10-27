@@ -239,13 +239,13 @@ else:
                             st.success(f'Filled missing values in {column} with Mode')
 
                     # Forward-fill 
-                    with col13:
+                    with col9:
                         if st.button(f'Forward fill {column}'):
                             df[column] = df[column].fillna(method='ffill')
                             st.success(f'Filled missing values in {column} with Forward fill')
 
                     # Backward-fill
-                    with col14:
+                    with col10:
                         if st.button(f'Backward fill {column}'):
                             df[column] = df[column].fillna(method='bfill')
                             st.success(f'Filled missing values in {column} with Backward fill')
