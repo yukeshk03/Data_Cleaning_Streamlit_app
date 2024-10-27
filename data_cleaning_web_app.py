@@ -3,10 +3,10 @@ import pandas as pd
 from io import BytesIO
 
 def summary(x):
-if x is not None:
-dt = pd.DataFrame(x.dtypes).reset_index()
-dt.columns = ['Columns List', 'Data types']
-return dt
+    if x is not None:
+    dt = pd.DataFrame(x.dtypes).reset_index()
+    dt.columns = ['Columns List', 'Data types']
+    return dt
 
 # Function to convert DataFrame to CSV and provide download link
 
