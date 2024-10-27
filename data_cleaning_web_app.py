@@ -187,25 +187,26 @@ else:
             st.write('### After Deletion')
             st.write(after_missing)
         
-        with st.expander('',expanded=True):
+        with st.expander('', expanded=True):
             st.write('### *Filling Missing Values*')
             st.write('***')
+            
             # Display columns with missing values
             missing = df.isnull().sum()
             missing = missing[missing > 0]
             st.write("### Columns with missing values:")
             st.write(missing)
-
+        
             # Select columns to fill missing values
             fill_selected_values = st.multiselect('Select columns to fill missing values', options=missing.index.tolist())
-
+        
             if fill_selected_values:  # Proceed only if the user selects columns
-                col9, col10, col11, col12, col13, col14 = st.columns(6)
-
+                col9, col10, col11 = st.columns(3)  # Reduced columns to prevent overlap
+        
                 for column in fill_selected_values:
                     col_type = df[column].dtype
-
-                    # Zero-fill 
+        
+                    # Zero-fill
                     with col9:
                         if st.button(f'Zero fill {column}'):
                             if pd.api.types.is_numeric_dtype(df[column]):
@@ -213,8 +214,8 @@ else:
                                 st.success(f'Filled missing values in {column} with zero')
                             else:
                                 st.warning(f'Cannot apply zero fill to {column} (Data type: {col_type})')
-
-                    # Median-fill 
+        
+                    # Median-fill
                     with col10:
                         if st.button(f'Median fill {column}'):
                             if pd.api.types.is_numeric_dtype(df[column]):
@@ -222,8 +223,8 @@ else:
                                 st.success(f'Filled missing values in {column} with Median')
                             else:
                                 st.warning(f'Cannot apply median fill to {column} (Data type: {col_type})')
-
-                    # Mean-fill 
+        
+                    # Mean-fill
                     with col11:
                         if st.button(f'Mean fill {column}'):
                             if pd.api.types.is_numeric_dtype(df[column]):
@@ -231,24 +232,25 @@ else:
                                 st.success(f'Filled missing values in {column} with Mean')
                             else:
                                 st.warning(f'Cannot apply mean fill to {column} (Data type: {col_type})')
-
-                    # Mode-fill 
-                    with col12:
+        
+                    # Mode-fill
+                    with col9:
                         if st.button(f'Mode fill {column}'):
                             df[column] = df[column].fillna(df[column].mode()[0])
                             st.success(f'Filled missing values in {column} with Mode')
-
-                    # Forward-fill 
-                    with col9:
+        
+                    # Forward-fill
+                    with col10:
                         if st.button(f'Forward fill {column}'):
                             df[column] = df[column].fillna(method='ffill')
                             st.success(f'Filled missing values in {column} with Forward fill')
-
+        
                     # Backward-fill
-                    with col10:
+                    with col11:
                         if st.button(f'Backward fill {column}'):
                             df[column] = df[column].fillna(method='bfill')
                             st.success(f'Filled missing values in {column} with Backward fill')
+        
             else:
                 st.warning("Note: Selection is not possible if there are no missing values.")
 
