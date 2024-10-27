@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
-def summary(x):
-    if x is not None:
-        dt = pd.DataFrame(x.dtypes).reset_index()
+def summary(df):
+    if df is not None:
+        dt = pd.DataFrame(df.dtypes).reset_index()
         dt.columns = ['Columns List', 'Data types']
         return dt
 
@@ -14,8 +14,6 @@ def convert_df_to_csv(df):
 
 # Function to get the CSV download link
 def get_download_link(df, filename="updated_data_web_app.csv"):
-
-    
     csv = convert_df_to_csv(df)
     st.sidebar.download_button(
         label="📥 Download ",
@@ -23,7 +21,8 @@ def get_download_link(df, filename="updated_data_web_app.csv"):
         file_name=filename,
         mime='text/csv'
     )
-#Button CSS 
+
+# Button CSS
 st.markdown("""
     <style>
     .stButton > button {
@@ -33,6 +32,7 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
 # Reset session state function
 def reset_session_state():
     st.session_state.clear()  # Clear all session state
@@ -59,8 +59,12 @@ else:
         # Save the file name in session to detect new file uploads
         st.session_state.last_uploaded_file = file
 
-        # Read CSV file
-        df = pd.read_csv(file)
+        # Load the data into session state if not already done
+        if 'df' not in st.session_state:
+            st.session_state.df = pd.read_csv(file)
+
+        # Assign session state DataFrame to a variable for easy reference
+        df = st.session_state.df
 
         # Initialize session state for modified columns if not already initialized
         if 'modified_columns' not in st.session_state:
@@ -85,7 +89,8 @@ else:
                         df[column] = pd.to_datetime(df[column], format="%d-%m-%Y", errors='coerce')
                     elif col_type == "categorical" and current_type != 'category':
                         df[column] = df[column].astype('category')
-                st.success('Changes reflects on Data Overview')
+                st.success('Changes reflect on Data Overview')
+                st.session_state.df = df  # Save updated DataFrame to session state
 
         with col1:
             with st.expander('Data Overview', expanded=True):
@@ -104,49 +109,37 @@ else:
             st.markdown("> *Buttons will strip the additional Spaces.And perform respective functions.Space -Replace will replace everything with underscore*")
             # Buttons for modifying column names
             col3, col4, col5, col6 = st.columns(4)
-            if st.button:
-                with col3:
-                    if st.button('Capital'):
-                        after_col = [col.strip().title() for col in before_col]
-                        st.session_state.modified_columns = after_col
-                        st.success('Updated column names to Capital Case')
-                with col4:
-                    if st.button('Uppercase'):
-                        after_col = [col.strip().upper() for col in before_col]
-                        st.session_state.modified_columns = after_col
-                        st.success('Updated column names to Upper Case')
-                with col5:
-                    if st.button('Lowercase'):
-                        after_col = [col.strip().lower() for col in before_col]
-                        st.session_state.modified_columns = after_col
-                        st.success('Updated column names to Lower Case')
-                with col6:
-                    if st.button('Spaces ➡ Underscore'):
-                        # Replace spaces with underscores in column names
-                        after_col = [col.replace(" ", "_") for col in before_col]
-                        st.session_state.modified_columns = after_col
-                        st.success('Updated column names: Spaces replaced with underscores')
+            with col3:
+                if st.button('Capital'):
+                    after_col = [col.strip().title() for col in before_col]
+                    st.session_state.modified_columns = after_col
+                    st.success('Updated column names to Capital Case')
+            with col4:
+                if st.button('Uppercase'):
+                    after_col = [col.strip().upper() for col in before_col]
+                    st.session_state.modified_columns = after_col
+                    st.success('Updated column names to Upper Case')
+            with col5:
+                if st.button('Lowercase'):
+                    after_col = [col.strip().lower() for col in before_col]
+                    st.session_state.modified_columns = after_col
+                    st.success('Updated column names to Lower Case')
+            with col6:
+                if st.button('Spaces ➡ Underscore'):
+                    after_col = [col.replace(" ", "_") for col in before_col]
+                    st.session_state.modified_columns = after_col
+                    st.success('Updated column names: Spaces replaced with underscores')
 
-        # Change column name
-            st.write("")
-            st.write("***")
-            st.write("### *Rename Column Names* ")
-            st.write('***')
-            columns_names = st.session_state.modified_columns
-            column_select = st.selectbox('Enter column name', options=columns_names)
-            new_column_name = st.text_input('Enter New column name,')
-            if st.button('Update'):
-                if column_select and new_column_name:
-                    st.session_state.modified_columns = [
-                        new_column_name if col == column_select else col 
-                        for col in st.session_state.modified_columns
-                    ]
+            # Update column names in df
             df.columns = st.session_state.modified_columns
-            update_column_name=pd.DataFrame(df.columns,columns=['Updated Column Names'])
+            st.session_state.df = df
+
+            update_column_name = pd.DataFrame(df.columns, columns=['Updated Column Names'])
             st.success("Updated Column Names")
             st.table(update_column_name)
-        # Duplicated rows
-        with st.expander("",expanded=True):
+
+        # Duplicate rows
+        with st.expander("", expanded=True):
             st.write("### *Duplicate Rows*")
             st.write('***')
             duplicate = df.duplicated().sum()
@@ -154,120 +147,96 @@ else:
             if st.button('Delete Duplicate'):
                 if duplicate:
                     df.drop_duplicates(inplace=True)
+                    st.session_state.df = df
                 st.success('Successfully Deleted Duplicates')
             after_duplicate = df.duplicated().sum()
             st.write(f"Current Duplicate rows: {after_duplicate}")
 
         # Missing Values
-        with st.expander("",expanded=True):
+        with st.expander("", expanded=True):
             st.write('### *Missing Values*')
             st.write('***')
             col7, col8 = st.columns(2)
             with col7:
                 missing = df.isnull().sum().reset_index()
-                missing.columns=['Columns','Missing Values']
+                missing.columns = ['Columns', 'Missing Values']
                 st.write("### Before Deletion")
                 st.write(missing)
 
             with col8:
-                st.write('')
-                st.write('')
-                st.write('')
-                st.write('')
                 if st.button('Column-wise'):
                     df.dropna(axis=1, inplace=True)
+                    st.session_state.df = df
                     st.success('Column-wise Deletion successful')
                 if st.button('Row-wise'):
                     df.dropna(axis=0, inplace=True)
+                    st.session_state.df = df
                     st.success('Row-wise Deletion successful')
-              
 
             after_missing = df.isnull().sum().reset_index()
             after_missing.columns = ['Columns', 'Missing Values']
             st.write('### After Deletion')
             st.write(after_missing)
-        
+
+        # Filling Missing Values
         with st.expander('', expanded=True):
             st.write('### *Filling Missing Values*')
             st.write('***')
-            
-            # Display columns with missing values
+
             missing = df.isnull().sum()
             missing = missing[missing > 0]
             st.write("### Columns with missing values:")
             st.write(missing)
-        
-            # Select columns to fill missing values
-            fill_selected_values = st.multiselect('Select columns to fill missing values', options=missing.index.tolist())
-        
-            if fill_selected_values:  # Proceed only if the user selects columns
-                col9, col10, col11 = st.columns(3)  # Reduced columns to prevent overlap
-        
-                for column in fill_selected_values:
-                    col_type = df[column].dtype
-        
-                    # Zero-fill
-                    with col9:
-                        if st.button(f'Zero fill {column}'):
-                            if pd.api.types.is_numeric_dtype(df[column]):
-                                df[column] = df[column].fillna(0)
-                                st.success(f'Filled missing values in {column} with zero')
-                            else:
-                                st.warning(f'Cannot apply zero fill to {column} (Data type: {col_type})')
-        
-                    # Median-fill
-                    with col10:
-                        if st.button(f'Median fill {column}'):
-                            if pd.api.types.is_numeric_dtype(df[column]):
-                                df[column] = df[column].fillna(df[column].median())
-                                st.success(f'Filled missing values in {column} with Median')
-                            else:
-                                st.warning(f'Cannot apply median fill to {column} (Data type: {col_type})')
-        
-                    # Mean-fill
-                    with col11:
-                        if st.button(f'Mean fill {column}'):
-                            if pd.api.types.is_numeric_dtype(df[column]):
-                                df[column] = df[column].fillna(df[column].mean())
-                                st.success(f'Filled missing values in {column} with Mean')
-                            else:
-                                st.warning(f'Cannot apply mean fill to {column} (Data type: {col_type})')
-        
-                    # Mode-fill
-                    with col9:
-                        if st.button(f'Mode fill {column}'):
-                            df[column] = df[column].fillna(df[column].mode()[0])
-                            st.success(f'Filled missing values in {column} with Mode')
-        
-                    # Forward-fill
-                    with col10:
-                        if st.button(f'Forward fill {column}'):
-                            df[column] = df[column].fillna(method='ffill')
-                            st.success(f'Filled missing values in {column} with Forward fill')
-        
-                    # Backward-fill
-                    with col11:
-                        if st.button(f'Backward fill {column}'):
-                            df[column] = df[column].fillna(method='bfill')
-                            st.success(f'Filled missing values in {column} with Backward fill')
-        
-            else:
-                st.warning("Note: Selection is not possible if there are no missing values.")
 
-        # Show remaining missing values after filling
+            fill_selected_values = st.multiselect('Select columns to fill missing values', options=missing.index.tolist())
+            for column in fill_selected_values:
+                col_type = df[column].dtype
+                col9, col10, col11 = st.columns(3)
+
+                with col9:
+                    if st.button(f'Zero fill {column}'):
+                        if pd.api.types.is_numeric_dtype(df[column]):
+                            df[column] = df[column].fillna(0)
+                            st.session_state.df = df
+                            st.success(f'Filled missing values in {column} with zero')
+
+                with col10:
+                    if st.button(f'Median fill {column}'):
+                        if pd.api.types.is_numeric_dtype(df[column]):
+                            df[column] = df[column].fillna(df[column].median())
+                            st.session_state.df = df
+                            st.success(f'Filled missing values in {column} with Median')
+
+                with col11:
+                    if st.button(f'Mean fill {column}'):
+                        if pd.api.types.is_numeric_dtype(df[column]):
+                            df[column] = df[column].fillna(df[column].mean())
+                            st.session_state.df = df
+                            st.success(f'Filled missing values in {column} with Mean')
+
+                with col9:
+                    if st.button(f'Mode fill {column}'):
+                        df[column] = df[column].fillna(df[column].mode()[0])
+                        st.session_state.df = df
+                        st.success(f'Filled missing values in {column} with Mode')
+
+                with col10:
+                    if st.button(f'Forward fill {column}'):
+                        df[column] = df[column].fillna(method='ffill')
+                        st.session_state.df = df
+                        st.success(f'Filled missing values in {column} with Forward fill')
+
+                with col11:
+                    if st.button(f'Backward fill {column}'):
+                        df[column] = df[column].fillna(method='bfill')
+                        st.session_state.df = df
+                        st.success(f'Filled missing values in {column} with Backward fill')
+
             after_fill = df.isnull().sum()
-            st.write('')
             st.write("### *Current Missing Values:*")
-            st.write('')
             st.write(after_fill)
 
-        st.write(" ")
-        st.write('### *Data Overview After Update*')
-        st.write('***')
-        st.table(df.head(8))
-
-        # Provide download link for the updated dataframe
-        st.sidebar.write("## 🗂️Download updated data ")
+        # Download the updated DataFrame as a CSV
         get_download_link(df)
 
     except Exception as e:
