@@ -99,40 +99,32 @@ else:
                 st.write(summary(df))
 
      
-        with st.expander("Change Column Names", expanded=True):
-        before_col = st.session_state.modified_columns
-        before_col_df = pd.DataFrame(before_col, columns=['Column Name'])
-        st.table(before_col_df)
-    
-        # Use st.columns to align buttons in the same row
-        col3, col4, col5, col6 = st.columns(4)
-        with col3:
-            if st.button('Capital'):
-                st.session_state.modified_columns = [col.title() for col in before_col]
-        with col4:
-            if st.button('Uppercase'):
-                st.session_state.modified_columns = [col.upper() for col in before_col]
-        with col5:
-            if st.button('Lowercase'):
-                st.session_state.modified_columns = [col.lower() for col in before_col]
-        with col6:
-            if st.button('Spaces ➡ Underscore'):
-                st.session_state.modified_columns = [col.replace(" ", "_") for col in before_col]
-    
-        df.columns = st.session_state.modified_columns
-    
-        st.success("Column name changes applied.")
-        st.table(pd.DataFrame(df.columns, columns=['Updated Column Names']))
-        # Rename column functionality
-        st.write("### *Rename Column Names*")
-        column_select = st.selectbox('Select column to rename', options=st.session_state.modified_columns)
-        new_column_name = st.text_input('Enter new column name')
-        if st.button('Update Column Name'):
-            if column_select and new_column_name:
-                st.session_state.modified_columns = [new_column_name if col == column_select else col for col in st.session_state.modified_columns]
-                df.columns = st.session_state.modified_columns
-                st.success("Column name updated.")
-                st.table(pd.DataFrame(df.columns, columns=['Updated Column Names']))
+        # Column name modifications
+st.write('### *Column Name Changes*')
+with st.expander("Change Column Names", expanded=True):
+    before_col = st.session_state.modified_columns
+    before_col_df = pd.DataFrame(before_col, columns=['Column Name'])
+    st.table(before_col_df)
+
+    # Use st.columns to align buttons in the same row
+    col3, col4, col5, col6 = st.columns(4)
+    with col3:
+        if st.button('Capital'):
+            st.session_state.modified_columns = [col.title() for col in before_col]
+    with col4:
+        if st.button('Uppercase'):
+            st.session_state.modified_columns = [col.upper() for col in before_col]
+    with col5:
+        if st.button('Lowercase'):
+            st.session_state.modified_columns = [col.lower() for col in before_col]
+    with col6:
+        if st.button('Spaces ➡ Underscore'):
+            st.session_state.modified_columns = [col.replace(" ", "_") for col in before_col]
+
+    df.columns = st.session_state.modified_columns
+
+    st.success("Column name changes applied.")
+    st.table(pd.DataFrame(df.columns, columns=['Updated Column Names']))
 
         # Duplicate rows handling
         with st.expander("Duplicate Rows", expanded=True):
