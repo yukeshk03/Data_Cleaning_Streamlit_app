@@ -121,10 +121,10 @@ else:
                 if st.button('Spaces ➡ Underscore'):
                     st.session_state.modified_columns = [col.replace(" ", "_") for col in before_col]
         
-                df.columns = st.session_state.modified_columns
+            df.columns = st.session_state.modified_columns
             
-                st.success("Column name changes applied.")
-                st.table(pd.DataFrame(df.columns, columns=['Updated Column Names']))
+            st.success("Column name changes applied.")
+            st.table(pd.DataFrame(df.columns, columns=['Updated Column Names']))
 
         # Duplicate rows handling
         with st.expander("Duplicate Rows", expanded=True):
